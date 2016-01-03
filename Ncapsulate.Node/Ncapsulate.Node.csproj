@@ -42,8 +42,11 @@
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.System.Web.Helpers.dll.2.0.0\lib\net20\System.Web.Helpers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml.Serialization" />
@@ -69,10 +72,13 @@
     <None Include="content\App_Build\node.targets">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Ncapsulate.Node.nuspec" />
+    <None Include="Ncapsulate.Node.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="build\Ncapsulate.Node.targets">
       <SubType>Designer</SubType>
     </None>
+    <None Include="packages.config" />
     <None Include="tools\commands.psm1" />
     <None Include="tools\init.ps1" />
     <None Include="tools\install.ps1" />

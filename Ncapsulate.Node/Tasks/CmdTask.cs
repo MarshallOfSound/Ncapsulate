@@ -95,6 +95,10 @@ namespace Ncapsulate.Node.Tasks
                                   orderby dir.FullName.Count(c => c == Path.DirectorySeparatorChar) descending // Get deepest first
                                   select dir;
 
+            this.Log.LogMessage(
+                                    MessageImportance.High,
+                                    "FOREACH START");
+
             foreach (var module in nodeModulesDirs.ToArray()
                 .Where(x => Directory.Exists(x.FullName))
                 .SelectMany(z => z.EnumerateDirectories().ToArray().Where(x => Directory.Exists(x.FullName))))
@@ -104,18 +108,24 @@ namespace Ncapsulate.Node.Tasks
                 // can find it without package.json.
                 if (module.Name != ".bin" && !File.Exists(Path.Combine(module.FullName, "index.js")))
                 {
-                    dynamic package = Json.Decode(File.ReadAllText(Path.Combine(module.FullName, "package.json")));
-                    string main = package.main;
-
-                    if (!string.IsNullOrEmpty(main))
+                    try
                     {
-                        if (!main.StartsWith("."))
-                            main = "./" + main;
+                        dynamic package = Json.Decode(File.ReadAllText(Path.Combine(module.FullName, "package.json")));
+                        string main = package.main;
 
-                        File.WriteAllText(
-                            Path.Combine(module.FullName, "index.js"),
-                            "module.exports = require(" + Json.Encode(main) + ");"
-                            );
+                        if (!string.IsNullOrEmpty(main))
+                        {
+                            if (!main.StartsWith("."))
+                                main = "./" + main;
+
+                            File.WriteAllText(
+                                Path.Combine(module.FullName, "index.js"),
+                                "module.exports = require(" + Json.Encode(main) + ");"
+                                );
+                        }
+                    } catch
+                    {
+                        // who cares
                     }
                 }
 
@@ -131,42 +141,47 @@ namespace Ncapsulate.Node.Tasks
                     var modulePackage = module.EnumerateFiles("package.json").FirstOrDefault();
                     if (targetPackage != null && modulePackage != null)
                     {
-                        var targetPackageJson = Json.Decode(File.ReadAllText(targetPackage.FullName));
-                        var targetVersionString = (string)targetPackageJson.version;
+                        try {
+                            var targetPackageJson = Json.Decode(File.ReadAllText(targetPackage.FullName));
+                            var targetVersionString = (string)targetPackageJson.version;
 
-                        var modulePackageJson = Json.Decode(File.ReadAllText(modulePackage.FullName));
-                        var moduleVersionString = (string)modulePackageJson.version;
+                            var modulePackageJson = Json.Decode(File.ReadAllText(modulePackage.FullName));
+                            var moduleVersionString = (string)modulePackageJson.version;
 
-                        if (targetVersionString != null && moduleVersionString != null)
+                            if (targetVersionString != null && moduleVersionString != null)
+                            {
+                                if (String.Compare(targetVersionString, moduleVersionString, StringComparison.OrdinalIgnoreCase) > 0)
+                                {
+                                    Directory.Delete(targetDir, true);
+                                    module.MoveTo(targetDir);
+                                    this.Log.LogMessage(
+                                        MessageImportance.High,
+                                        "Collapsing conflicting module " + module.Name + " v"
+                                        + targetPackageJson.version + " \n\t(vs existing version v"
+                                        + modulePackageJson.version + ")");
+                                    continue;
+                                }
+                                else if (!String.Equals(module.FullName.TrimEnd('\\'), targetInfo.FullName.TrimEnd('\\')) &&
+                                         String.Compare(targetVersionString, moduleVersionString, StringComparison.OrdinalIgnoreCase) <= 0)
+                                {
+                                    Directory.Delete(module.FullName, true);
+                                    this.Log.LogMessage(
+                                        MessageImportance.High,
+                                        "Deleting existing module " + module.Name + " v"
+                                        + targetPackageJson.version + " \n\t(vs existing version v"
+                                        + modulePackageJson.version + ")");
+                                    this.Log.LogMessage(
+                                        MessageImportance.High,
+                                        module.FullName);
+                                    this.Log.LogMessage(
+                                        MessageImportance.High,
+                                        targetInfo.FullName);
+                                    continue;
+                                }
+                            }
+                        } catch
                         {
-                            if (String.Compare(targetVersionString, moduleVersionString, StringComparison.OrdinalIgnoreCase) > 0)
-                            {
-                                Directory.Delete(targetDir, true);
-                                module.MoveTo(targetDir);
-                                this.Log.LogMessage(
-                                    MessageImportance.High,
-                                    "Collapsing conflicting module " + module.Name + " v"
-                                    + targetPackageJson.version + " \n\t(vs existing version v"
-                                    + modulePackageJson.version + ")");
-                                continue;
-                            }
-                            else if (!String.Equals(module.FullName.TrimEnd('\\'), targetInfo.FullName.TrimEnd('\\')) &&
-                                     String.Compare(targetVersionString, moduleVersionString, StringComparison.OrdinalIgnoreCase) <= 0)
-                            {
-                                Directory.Delete(module.FullName, true);
-                                this.Log.LogMessage(
-                                    MessageImportance.High,
-                                    "Deleting existing module " + module.Name + " v"
-                                    + targetPackageJson.version + " \n\t(vs existing version v"
-                                    + modulePackageJson.version + ")");
-                                this.Log.LogMessage(
-                                    MessageImportance.High,
-                                    module.FullName);
-                                this.Log.LogMessage(
-                                    MessageImportance.High,
-                                    targetInfo.FullName);
-                                continue;
-                            }
+                            // who cares
                         }
                     }
 

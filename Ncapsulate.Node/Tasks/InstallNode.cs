@@ -26,10 +26,29 @@ namespace Ncapsulate.Node.Tasks
     /// </summary>
     public class InstallNode : CmdTask
     {
+        public static void DeleteDirectory(string target_dir)
+        {
+            string[] files = Directory.GetFiles(target_dir);
+            string[] dirs = Directory.GetDirectories(target_dir);
+
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                DeleteDirectory(dir);
+            }
+
+            Directory.Delete(target_dir, false);
+        }
+
         public override bool Execute()
         {
             if (Directory.Exists(@"nodejs\node_modules"))
-                Directory.Delete(@"nodejs\node_modules", true);
+                DeleteDirectory(@"nodejs\node_modules");
             Directory.CreateDirectory(@"nodejs\tools");
             // Force npm to install modules to the subdirectory
             // https://npmjs.org/doc/files/npm-folders.html#More-Information
@@ -62,10 +81,10 @@ namespace Ncapsulate.Node.Tasks
                 Log.LogMessage(MessageImportance.High, "Downloading nodejs ...");
 
                 //return Task.FromResult<object>(null);
-                return new WebClient().DownloadFileTaskAsync("http://nodejs.org/dist/latest/node.exe", @"nodejs\node.exe");
+                return new WebClient().DownloadFileTaskAsync("http://nodejs.org/dist/latest/win-x86/node.exe", @"nodejs\node.exe");
             }
             Log.LogMessage(MessageImportance.High, "Downloading nodejs ...");
-            return new WebClient().DownloadFileTaskAsync("http://nodejs.org/dist/latest/node.exe", @"nodejs\node.exe");
+            return new WebClient().DownloadFileTaskAsync("http://nodejs.org/dist/latest/win-x86/node.exe", @"nodejs\node.exe");
         }
 
         private async Task DownloadNpmAsync()

@@ -36,7 +36,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\AD.System.Web.Helpers.dll.2.0.0\lib\net20\System.Web.Helpers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs">
@@ -56,6 +59,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Ncapsulate.Grunt.nuspec" />
+    <None Include="packages.config" />
     <None Include="tools\commands.psm1" />
     <None Include="tools\init.ps1" />
     <None Include="tools\install.ps1" />

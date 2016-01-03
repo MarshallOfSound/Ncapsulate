@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>$id$</id>
+    <id>Ncapsulate.Grunt.Shadow</id>
     <version>$gruntversion$</version>
     <title>$title$</title>
     <authors>$author$</authors>
@@ -22,7 +22,7 @@
       <frameworkAssembly assemblyName="Microsoft.Build.Utilities.v4.0" />
     </frameworkAssemblies>
     <dependencies>
-      <dependency id="Ncapsulate.Node" version="0.10" />
+      <dependency id="Ncapsulate.Node.Shadow" version="0.10" />
     </dependencies>
   </metadata>
   <files>
